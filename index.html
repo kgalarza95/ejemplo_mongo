@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Commerce con MongoDB Real</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #10b981;
+        --primary-dark: #059669;
+        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        --card-bg: rgba(30, 41, 59, 0.75);
+        --border-color: rgba(255, 255, 255, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      body {
+        background: var(--bg-gradient);
+        color: #f8fafc;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+      header h1 {
+        font-size: 2.5rem;
+        color: #34d399;
+        margin-bottom: 0.5rem;
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 2rem;
+      }
+      @media (max-width: 950px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        height: fit-content;
+      }
+      .card h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1.25rem;
+        color: #f1f5f9;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-bottom: 0.35rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: #fff;
+        outline: none;
+      }
+      input:focus {
+        border-color: var(--primary);
+      }
+      .btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .btn:hover {
+        background: var(--primary-dark);
+      }
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+      }
+      .product-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .product-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+      .product-title {
+        font-weight: 600;
+        color: #fff;
+      }
+      .product-sku {
+        font-size: 0.7rem;
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-family: monospace;
+      }
+      .product-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #34d399;
+        margin-bottom: 0.75rem;
+      }
+      .specs-box {
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+      }
+      .specs-title {
+        color: #38bdf8;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+      .spec-item {
+        display: flex;
+        justify-content: space-between;
+        color: #cbd5e1;
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+      }
+      .tag {
+        font-size: 0.65rem;
+        background: rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+      }
+      .action-btn {
+        width: 100%;
+        padding: 0.4rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+      }
+      .action-btn:hover {
+        background: rgba(239, 68, 68, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>
+          <i class="fa-solid fa-database"></i> Panel Conectado a MongoDB Atlas
+        </h1>
+        <p>Arquitectura Cliente-Servidor con Node.js y Express</p>
+      </header>
+
+      <div class="dashboard">
+        <div class="card">
+          <h2><i class="fa-solid fa-plus-circle"></i> Nuevo Producto</h2>
+          <form id="product-form">
+            <div class="form-group">
+              <label>SKU</label
+              ><input type="text" id="sku" required placeholder="TEC-001" />
+            </div>
+            <div class="form-group">
+              <label>Nombre</label
+              ><input
+                type="text"
+                id="nombre"
+                required
+                placeholder="Teclado Mecánico"
+              />
+            </div>
+            <div class="form-group">
+              <label>Precio ($)</label
+              ><input
+                type="number"
+                step="0.01"
+                id="precio"
+                required
+                placeholder="45.00"
+              />
+            </div>
+            <div class="form-group">
+              <label>Característica (Clave)</label
+              ><input type="text" id="specKey" placeholder="switch" />
+            </div>
+            <div class="form-group">
+              <label>Característica (Valor)</label
+              ><input type="text" id="specVal" placeholder="Red switches" />
+            </div>
+            <div class="form-group">
+              <label>Etiquetas (separadas por coma)</label
+              ><input
+                type="text"
+                id="etiquetas"
+                placeholder="gamer, perifericos"
+              />
+            </div>
+            <button type="submit" class="btn">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Guardar en MongoDB
+            </button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>
+            <i class="fa-solid fa-list"></i> Colección:
+            <code>catalogo</code> (Real)
+          </h2>
+          <div id="products-container" class="products-grid">
+            <p style="color: #64748b">Cargando datos desde el servidor...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3000/api/productos";
+
+      // READ: Obtener documentos reales de MongoDB a través de la API
+      async function cargarProductos() {
+        try {
+          const response = await fetch(API_URL);
+          const productos = await response.json();
+          const container = document.getElementById("products-container");
+          container.innerHTML = "";
+
+          if (productos.length === 0) {
+            container.innerHTML = `<p style="color: #64748b;">No hay documentos en la colección.</p>`;
+            return;
+          }
+
+          productos.forEach((prod) => {
+            let specsHTML = "";
+            if (prod.especificaciones) {
+              for (let [k, v] of Object.entries(prod.especificaciones)) {
+                specsHTML += `<div class="spec-item"><span><strong>${k}:</strong></span> <span>${v}</span></div>`;
+              }
+            }
+
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.innerHTML = `
+                        <div>
+                            <div class="product-header">
+                                <span class="product-title">${prod.nombre}</span>
+                                <span class="product-sku">${prod.sku}</span>
+                            </div>
+                            <div class="product-price">$${Number(prod.precio).toFixed(2)}</div>
+                            <div class="specs-box">
+                                <div class="specs-title"><i class="fa-solid fa-microchip"></i> especificaciones</div>
+                                ${specsHTML}
+                            </div>
+                            <div class="tags">
+                                ${(prod.etiquetas || []).map((t) => `<span class="tag">#${t}</span>`).join("")}
+                            </div>
+                        </div>
+                        <button class="action-btn" onclick="eliminarProducto('${prod._id}')"><i class="fa-solid fa-trash"></i> Borrar de MongoDB</button>
+                    `;
+            container.appendChild(card);
+          });
+        } catch (error) {
+          console.error("Error al cargar productos:", error);
+        }
+      }
+
+      // CREATE: Enviar datos al servidor para insertar en MongoDB
+      document
+        .getElementById("product-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const sKey = document.getElementById("specKey").value;
+          const sVal = document.getElementById("specVal").value;
+
+          let specs = {};
+          if (sKey && sVal) specs[sKey] = sVal;
+
+          const nuevoDoc = {
+            sku: document.getElementById("sku").value,
+            nombre: document.getElementById("nombre").value,
+            precio: parseFloat(document.getElementById("precio").value),
+            especificaciones: specs,
+            etiquetas: document
+              .getElementById("etiquetas")
+              .value.split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+          };
+
+          await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevoDoc),
+          });
+
+          document.getElementById("product-form").reset();
+          cargarProductos();
+        });
+
+      // DELETE: Eliminar documento real por _id
+      async function eliminarProducto(id) {
+        if (
+          confirm("¿Estás seguro de eliminar este documento de MongoDB Atlas?")
+        ) {
+          await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+          cargarProductos();
+        }
+      }
+
+      // Cargar al iniciar
+      cargarProductos();
+    </script>
+  </body>
+</html>
